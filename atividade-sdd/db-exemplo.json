@@ -1,0 +1,32 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Usuário Exemplo",
+      "email": "usuario@exemplo.com",
+      "password": "123456"
+    }
+  ],
+  "pages": [
+    {
+      "id": 1,
+      "userId": 1,
+      "title": "Minha primeira nota",
+      "type": "note",
+      "content": "Conteúdo de exemplo da nota."
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "title": "Minha checklist",
+      "type": "checklist",
+      "items": [
+        {
+          "id": 1,
+          "text": "Item de exemplo",
+          "done": false
+        }
+      ]
+    }
+  ]
+}

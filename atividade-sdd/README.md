@@ -1,16 +1,69 @@
-# React + Vite
+# Atividade SDD - App de Anotações
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+MVP acadêmico de app de anotações (estilo Notion simplificado), com React + Vite, axios e JSON Server.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js (versão LTS recomendada)
+- npm
 
-## React Compiler
+## Configuração inicial
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Entre na pasta do projeto:
 
-## Expanding the Oxlint configuration
+```bash
+cd atividade-sdd
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+2. Instale as dependências:
+
+```bash
+npm install
+```
+
+3. Crie o arquivo de banco local a partir do exemplo:
+
+```bash
+# Windows (PowerShell)
+Copy-Item db-exemplo.json db.json
+
+# Linux/macOS
+cp db-exemplo.json db.json
+```
+
+> O arquivo `db.json` é o banco local usado pelo JSON Server e **não deve ser versionado**. O arquivo `db-exemplo.json` é o modelo/seed versionado.
+
+## Execução
+
+Em dois terminais separados (dentro de `atividade-sdd`):
+
+1. Suba a API mock (JSON Server):
+
+```bash
+npm run server
+```
+
+API disponível em `http://localhost:3001` (recursos: `/users`, `/pages`).
+
+2. Suba o front-end (Vite):
+
+```bash
+npm run dev
+```
+
+Acesse a URL exibida pelo Vite (normalmente `http://localhost:5173`).
+
+## Scripts
+
+- `npm run dev` — inicia o front-end com Vite.
+- `npm run server` — inicia o JSON Server observando `db.json` na porta `3001`.
+- `npm run build` — gera build de produção.
+- `npm run preview` — pré-visualiza o build.
+- `npm run lint` — executa o Oxlint.
+
+## Estrutura de dados (`db-exemplo.json`)
+
+- `users`: `{ id, name, email, password }`
+- `pages`: páginas do usuário
+  - Nota: `{ id, userId, title, type: "note", content }`
+  - Checklist: `{ id, userId, title, type: "checklist", items: [{ id, text, done }] }`
