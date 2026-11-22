@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth/auth-context'
 import { ProtectedRoute } from './auth/ProtectedRoute'
+import ChecklistEditorPage from './pages/ChecklistEditorPage'
 import LoginPage from './pages/LoginPage'
 import PageEditorPage from './pages/PageEditorPage'
 import PagesPage from './pages/PagesPage'
@@ -52,6 +53,22 @@ export default function App() {
         element={
           <ProtectedRoute>
             <PageEditorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/checklists/nova"
+        element={
+          <ProtectedRoute>
+            <ChecklistEditorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/checklists/:id"
+        element={
+          <ProtectedRoute>
+            <ChecklistEditorPage />
           </ProtectedRoute>
         }
       />

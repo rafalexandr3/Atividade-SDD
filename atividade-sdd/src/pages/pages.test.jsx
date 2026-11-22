@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
+import {
+  act,
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom'
 import App from '../App'
@@ -245,21 +252,24 @@ describe('CRUD de páginas do tipo nota', () => {
     expect(await screen.findByText('Minha nota')).toBeTruthy()
     expect(screen.getByText('Minha checklist')).toBeTruthy()
     expect(
-      screen.queryByRole('link', { name: 'Minha checklist' }),
-    ).toBeNull()
-    expect(screen.getAllByRole('button', { name: 'Excluir' })).toHaveLength(1)
+      screen.getByRole('link', { name: 'Minha checklist' }).getAttribute('href'),
+    ).toBe('/checklists/2')
+    expect(screen.getAllByRole('button', { name: 'Excluir' })).toHaveLength(2)
 
-    await user.click(screen.getByRole('button', { name: 'Excluir' }))
+    const noteItem = screen.getByText('Minha nota').closest('li')
+    const checklistItem = screen.getByText('Minha checklist').closest('li')
+
+    await user.click(within(noteItem).getByRole('button', { name: 'Excluir' }))
     expect(document.activeElement).toBe(
       screen.getByRole('button', { name: 'Confirmar' }),
     )
 
     await user.click(screen.getByRole('button', { name: 'Cancelar' }))
     expect(document.activeElement).toBe(
-      screen.getByRole('button', { name: 'Excluir' }),
+      within(noteItem).getByRole('button', { name: 'Excluir' }),
     )
 
-    await user.click(screen.getByRole('button', { name: 'Excluir' }))
+    await user.click(within(noteItem).getByRole('button', { name: 'Excluir' }))
     expect(document.activeElement).toBe(
       screen.getByRole('button', { name: 'Confirmar' }),
     )
@@ -272,6 +282,9 @@ describe('CRUD de páginas do tipo nota', () => {
       expect(screen.queryByText('Minha nota')).toBeNull()
     })
     expect(screen.getByText('Minha checklist')).toBeTruthy()
+    expect(
+      within(checklistItem).getByRole('button', { name: 'Excluir' }),
+    ).toBeTruthy()
   })
 
   it('abrir id inexistente mostra "Página não encontrada" com opção de voltar', async () => {

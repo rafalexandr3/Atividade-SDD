@@ -62,6 +62,29 @@ export async function updateNote(id, { title, content }) {
   }
 }
 
+export async function createChecklist({ userId, title, items }) {
+  try {
+    const { data } = await client.post('/pages', {
+      userId,
+      title,
+      type: 'checklist',
+      items,
+    })
+    return data
+  } catch (error) {
+    throw toPagesError(error)
+  }
+}
+
+export async function updateChecklist(id, { title, items }) {
+  try {
+    const { data } = await client.patch(`/pages/${id}`, { title, items })
+    return data
+  } catch (error) {
+    throw toPagesError(error)
+  }
+}
+
 export async function remove(id) {
   try {
     await client.delete(`/pages/${id}`)

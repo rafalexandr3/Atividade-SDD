@@ -105,9 +105,14 @@ export default function PagesPage() {
         <p className="pages-greeting">Olá, {user.name}.</p>
 
         <div className="pages-toolbar">
-          <Link className="primary-action" to="/paginas/nova">
-            Nova nota
-          </Link>
+          <div className="pages-toolbar-actions">
+            <Link className="primary-action" to="/paginas/nova">
+              Nova nota
+            </Link>
+            <Link className="secondary-action" to="/checklists/nova">
+              Nova checklist
+            </Link>
+          </div>
         </div>
 
         {loading && (
@@ -134,7 +139,10 @@ export default function PagesPage() {
         {!loading && !loadError && pages.length === 0 && (
           <section className="empty-state" aria-labelledby="pages-empty-title">
             <h2 id="pages-empty-title">Nenhuma página ainda</h2>
-            <p>Use “Nova nota” para criar sua primeira anotação.</p>
+            <p>
+              Use “Nova nota” ou “Nova checklist” para criar sua primeira
+              página.
+            </p>
           </section>
         )}
 
@@ -142,15 +150,17 @@ export default function PagesPage() {
           <ul className="page-list">
             {pages.map((page) => {
               const isNote = page.type === 'note'
+              const editorPath = isNote
+                ? `/paginas/${page.id}`
+                : page.type === 'checklist'
+                  ? `/checklists/${page.id}`
+                  : null
 
               return (
                 <li className="page-item" key={page.id}>
                   <div className="page-item-main">
-                    {isNote ? (
-                      <Link
-                        className="page-item-title"
-                        to={`/paginas/${page.id}`}
-                      >
+                    {editorPath ? (
+                      <Link className="page-item-title" to={editorPath}>
                         {page.title}
                       </Link>
                     ) : (
@@ -165,7 +175,7 @@ export default function PagesPage() {
                     </span>
                   </div>
 
-                  {isNote && (
+                  {(isNote || page.type === 'checklist') && (
                     <div className="page-item-actions">
                       {confirmingId === page.id ? (
                         <>
