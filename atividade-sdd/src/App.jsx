@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth/auth-context'
 import { ProtectedRoute } from './auth/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
+import PageEditorPage from './pages/PageEditorPage'
 import PagesPage from './pages/PagesPage'
 import RegisterPage from './pages/RegisterPage'
 import './App.css'
@@ -35,6 +36,22 @@ export default function App() {
         element={
           <ProtectedRoute>
             <PagesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/paginas/nova"
+        element={
+          <ProtectedRoute>
+            <PageEditorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/paginas/:id"
+        element={
+          <ProtectedRoute>
+            <PageEditorPage />
           </ProtectedRoute>
         }
       />

@@ -199,13 +199,14 @@ describe('autenticação', () => {
 
   it('sessão persistida mantém o usuário autenticado após recarregar', async () => {
     window.localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser))
+    mockGet.mockResolvedValue({ data: [] })
     renderApp(['/'])
 
     expect(
       await screen.findByRole('heading', { name: 'Suas páginas' }),
     ).toBeTruthy()
     expect(screen.getByText('Olá, Usuário Exemplo.')).toBeTruthy()
-    expect(mockGet).not.toHaveBeenCalled()
+    expect(mockGet).not.toHaveBeenCalledWith('/users', expect.anything())
   })
 
   it('sessão com JSON corrompido é descartada e redireciona para /login', async () => {

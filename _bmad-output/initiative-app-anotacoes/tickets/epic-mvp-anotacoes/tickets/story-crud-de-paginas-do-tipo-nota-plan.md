@@ -3,14 +3,14 @@ title: 'CRUD de páginas do tipo nota'
 type: feature
 ticket: '3'
 created: '2026-11-22'
-status: ready-for-dev
+status: built
 baseline_revision: 'f91fd8a8a7610e810d950ded327c4704637a38e0'
 route: full
 route_source: pinned
 risk: medium
 review: quick
 review_source: pinned
-lenses_ran: []
+lenses_ran: [quick]
 review_loop_iteration: 0
 context: []
 ---
@@ -71,9 +71,21 @@ context: []
 
 ## Implementation Notes
 
+- `src/api/pages.js` centraliza CRUD e traduz rede/404; a lista usa `GET /pages?userId=<id>`.
+- `PageEditorPage` revalida posse e tipo no `PATCH` e reseta o formulário quando `:id` muda (back/forward entre notas).
+- `auth.test.jsx` passou a mockar a lista de páginas no teste de sessão persistida; o fluxo de auth não mudou.
+- Revisão quick: 1 achado refutado e 5 patches aplicados (posse no save, status “Nota salva”, fonte do textarea, foco na exclusão e affordance do link).
+
 ## Plan Change Log
 
 ## Review Triage Log
+
+- quick / false — `atividade-sdd/src/auth/auth.test.jsx:200-209` — a suíte de auth precisou deixar de exigir “nenhum GET”, pois a lista agora busca `/pages`; a asserção nova ainda pega o único formato de chamada de login (`client.get('/users', { params })` em `AuthContext.jsx`), e o fluxo de auth não mudou.
+- quick / medium / patch — `atividade-sdd/src/pages/PageEditorPage.jsx:96-99` — confirmado: o `PATCH` usa o `:id` da URL sem reconferir posse e o efeito não reativa `loading` ao trocar de id; voltar/avançar entre `/paginas/:id` pode exibir dados antigos e salvar na página errada. Corrigir guarda no save e reset ao trocar id.
+- quick / low / patch — `atividade-sdd/src/App.css:287-299` — confirmado: `textarea` não herda a fonte (só `button, input` em `index.css`), então o conteúdo aparece em monospace; adicionar `font: inherit`.
+- quick / medium / patch — `atividade-sdd/src/pages/PageEditorPage.jsx:20,72,94,98,176,200` — confirmado: “Nota salva” permanece após editar o texto, sugerindo que alterações não salvas estão persistidas; limpar o status em qualquer mudança.
+- quick / low / patch — `atividade-sdd/src/pages/PagesPage.jsx:147-181` — confirmado: ao trocar “Excluir” por “Confirmar/Cancelar” o foco cai no `body`; focar “Confirmar” ao abrir e devolver o foco ao cancelar.
+- quick / low / patch — `atividade-sdd/src/App.css:287-299` — confirmado: título de nota clicável e título de checklist usam a mesma cor e só diferem no hover; adicionar affordance visível em repouso.
 
 ## Design Notes
 
