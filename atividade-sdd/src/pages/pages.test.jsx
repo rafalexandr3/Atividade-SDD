@@ -242,6 +242,23 @@ describe('CRUD de páginas do tipo nota', () => {
     expect(mockPatch).toHaveBeenCalledTimes(1)
   })
 
+  it('lista apenas as páginas da conta logada, mesmo se a API devolver outras', async () => {
+    const otherUserNote = {
+      id: 9,
+      userId: 2,
+      title: 'Nota de outra conta',
+      type: 'note',
+      content: 'Segredo',
+    }
+
+    mockGet.mockResolvedValue({ data: [note, otherUserNote] })
+    renderApp(['/'])
+
+    expect(await screen.findByText('Minha nota')).toBeTruthy()
+    expect(screen.queryByText('Nota de outra conta')).toBeNull()
+    expect(screen.getAllByRole('button', { name: 'Excluir' })).toHaveLength(1)
+  })
+
   it('exclui a nota em dois passos e remove a linha da lista', async () => {
     mockGet.mockResolvedValue({ data: [note, checklist] })
     mockDelete.mockResolvedValue({})

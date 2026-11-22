@@ -24,7 +24,8 @@ function toPagesError(error) {
 export async function listByUser(userId) {
   try {
     const { data } = await client.get('/pages', { params: { userId } })
-    return Array.isArray(data) ? data : []
+    if (!Array.isArray(data)) return []
+    return data.filter((page) => String(page.userId) === String(userId))
   } catch (error) {
     throw toPagesError(error)
   }

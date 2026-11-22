@@ -508,7 +508,20 @@ a.page-item-title:hover {
     align-items: flex-start;
   }
 
+  .pages-toolbar-actions {
+    width: 100%;
+  }
+
+  .pages-toolbar-actions .primary-action,
+  .pages-toolbar-actions .secondary-action {
+    flex: 1;
+  }
+
   .page-item-actions {
+    width: 100%;
+  }
+
+  .not-found-actions .primary-action {
     width: 100%;
   }
 
