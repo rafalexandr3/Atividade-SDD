@@ -66,3 +66,4 @@ Não inclui: backend real, token/segurança de servidor, colaboração, exporta�
 
 - Decision: 2026-11-22 — Um único épico: escopo pequeno, um deploy local, sem fronteira de entrega separada. (Sofia, confirmado pelo usuário ao pedir fatiamento)
 - Decision: 2026-11-22 — Story 1 é o tracer bullet (scaffold + base executável). (Sofia)
+- Decision: 2026-11-22 — Story 6 "Varredura de refatoração" adicionada; escopo só limpeza de débitos aprovados, sem mudança de comportamento. (usuário)
