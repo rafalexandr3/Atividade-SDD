@@ -1,0 +1,58 @@
+# A container's agreed children, in its tickets/ folder; tickets.py ignores unknown keys.
+# Table order is build order. `id` is permanent, never reused.
+next_id = 6
+
+[[entry]]
+id = 1
+type = "story"
+title = "Scaffold do projeto e base de dados local"
+description = "Prepara o app React+Vite em atividade-sdd, configura axios/JSON Server, cria db-exemplo.json e gitignore para db.json, e documenta a execução no README."
+verify = "Com README, `npm run dev` sobe o front e `npm run server` sobe o JSON Server lendo db.json criado a partir de db-exemplo.json; db.json não aparece no git status."
+covers = ["R7", "C1", "C4"]
+after = []
+hitl = false
+risk = "low"
+
+[[entry]]
+id = 2
+type = "story"
+title = "Cadastro, login, sessão e guarda de rota"
+description = "Implementa cadastro e login simulados contra JSON Server, persiste sessão em localStorage, protege rotas autenticadas e oferece logout."
+verify = "Usuário cadastra, faz login, recarrega e continua autenticado; credencial inválida é recusada; logout limpa sessão e redireciona/bloqueia a área de páginas."
+covers = ["R1", "R2", "C2"]
+after = [1]
+hitl = false
+risk = "medium"
+
+[[entry]]
+id = 3
+type = "story"
+title = "CRUD de páginas do tipo nota"
+description = "Permite ao usuário autenticado criar, listar, abrir, editar e excluir páginas note com title e content, persistidas no JSON Server."
+verify = "Usuário cria uma nota, a reabre com title/content preservados, edita, recarrega e vê a alteração; exclui a nota e ela some da lista."
+covers = ["R3", "R4", "C4"]
+after = [2]
+hitl = false
+risk = "medium"
+
+[[entry]]
+id = 4
+type = "story"
+title = "Páginas do tipo checklist com itens editáveis"
+description = "Permite criar e editar checklists com items[{id,text,done}], marcando/desmarcando, adicionando e removendo itens após a criação."
+verify = "Usuário cria checklist, marca/desmarca item, adiciona e remove item, recarrega e o estado permanece; itens removidos não reaparecem."
+covers = ["R3", "R5", "C4"]
+after = [3]
+hitl = false
+risk = "medium"
+
+[[entry]]
+id = 5
+type = "story"
+title = "Isolamento por usuário, responsividade e fechamento do MVP"
+description = "Garante que consultas/listagens filtrem por userId, valida o fluxo com duas contas, ajusta layout 320-1440px e fecha o README/checklist de entrega."
+verify = "Conta A não vê páginas da conta B; em 320px e 1440px a interface é utilizável; README permite rodar o fluxo completo de ponta a ponta."
+covers = ["R6", "R8", "R7"]
+after = [4]
+hitl = false
+risk = "medium"
