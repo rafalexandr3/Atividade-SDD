@@ -1,7 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { createNote, getById, updateNote } from '../api/pages'
+import { createNote, updateNote } from '../api/pages'
 import { useAuth } from '../auth/auth-context'
+import { AppHeader } from '../components/AppHeader'
+import {
+  LoadErrorState,
+  LoadingState,
+  NotFoundState,
+} from '../components/PageStates'
+import { isPageOfType, isPageOwnedBy } from './page-ownership'
+import { usePageLoader } from './usePageLoader'
 
 export default function PageEditorPage() {
   const { user } = useAuth()
@@ -12,80 +20,38 @@ export default function PageEditorPage() {
 
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
-  const [loadedPage, setLoadedPage] = useState(null)
-  const [loading, setLoading] = useState(!isNew)
-  const [notFound, setNotFound] = useState(false)
-  const [loadError, setLoadError] = useState('')
   const [fieldError, setFieldError] = useState('')
   const [formError, setFormError] = useState('')
   const [savedId, setSavedId] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [reloadKey, setReloadKey] = useState(0)
-  const [trackedId, setTrackedId] = useState(id)
+
+  const {
+    loadedPage,
+    loading,
+    notFound,
+    loadError,
+    retry,
+    markNotFound,
+    startLoading,
+  } = usePageLoader({
+    id,
+    type: 'note',
+    userId: user.id,
+    onIdChange: ({ previousId }) => {
+      setFieldError('')
+      setFormError('')
+      setTitle('')
+      setContent('')
+      setSaving(false)
+      if (previousId !== undefined) setSavedId(null)
+    },
+    onLoaded: (page) => {
+      setTitle(page.title ?? '')
+      setContent(page.content ?? '')
+    },
+  })
 
   const saved = !isNew && String(savedId) === String(id)
-
-  if (trackedId !== id) {
-    setTrackedId(id)
-    setLoadedPage(null)
-    setLoading(!isNew)
-    setNotFound(false)
-    setLoadError('')
-    setFieldError('')
-    setFormError('')
-    setTitle('')
-    setContent('')
-    setSaving(false)
-    if (trackedId !== undefined) setSavedId(null)
-  }
-
-  useEffect(() => {
-    if (isNew) return
-
-    let active = true
-
-    getById(id)
-      .then((page) => {
-        if (!active) return
-
-        if (
-          page.type !== 'note' ||
-          String(page.userId) !== String(user.id)
-        ) {
-          setNotFound(true)
-          return
-        }
-
-        setLoadedPage(page)
-        setTitle(page.title ?? '')
-        setContent(page.content ?? '')
-      })
-      .catch((error) => {
-        if (!active) return
-
-        if (error.status === 404) {
-          setNotFound(true)
-          return
-        }
-
-        setLoadError(error.message)
-      })
-      .finally(() => {
-        if (active) setLoading(false)
-      })
-
-    return () => {
-      active = false
-    }
-  }, [id, isNew, user.id, reloadKey])
-
-  function handleRetry() {
-    setLoading(true)
-    setLoadedPage(null)
-    setLoadError('')
-    setNotFound(false)
-    setReloadKey((current) => current + 1)
-  }
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -110,18 +76,17 @@ export default function PageEditorPage() {
           title: trimmedTitle,
           content,
         })
-        setLoading(true)
+        startLoading()
         setSavedId(String(created.id))
         navigate(`/paginas/${created.id}`, { replace: true })
       } else {
         if (
           !loadedPage ||
           String(loadedPage.id) !== String(id) ||
-          loadedPage.type !== 'note' ||
-          String(loadedPage.userId) !== String(user.id)
+          !isPageOfType(loadedPage, 'note') ||
+          !isPageOwnedBy(loadedPage, user.id)
         ) {
-          setNotFound(true)
-          setLoadError('')
+          markNotFound()
           return
         }
 
@@ -137,53 +102,15 @@ export default function PageEditorPage() {
 
   return (
     <div className="pages-layout">
-      <header className="app-header">
-        <p className="brand">App de Anotações</p>
-        <div className="app-header-user">
-          <span className="user-name">{user.name}</span>
-          <Link className="ghost-button" to="/">
-            Suas páginas
-          </Link>
-        </div>
-      </header>
+      <AppHeader userName={user.name} />
 
       <main className="pages-main editor-main">
-        {loading && (
-          <p className="page-status" role="status">
-            Carregando página...
-          </p>
-        )}
+        {loading && <LoadingState message="Carregando página..." />}
 
-        {!loading && notFound && (
-          <section className="not-found" aria-labelledby="page-not-found-title">
-            <h1 id="page-not-found-title">Página não encontrada</h1>
-            <p>Esta página não existe ou não pertence à sua conta.</p>
-            <div className="not-found-actions">
-              <Link className="primary-action" to="/">
-                Voltar para suas páginas
-              </Link>
-            </div>
-          </section>
-        )}
+        {!loading && notFound && <NotFoundState />}
 
         {!loading && !notFound && loadError && (
-          <div className="page-load-error">
-            <p className="form-error" role="alert">
-              {loadError}
-            </p>
-            <div className="editor-actions">
-              <button
-                className="secondary-action"
-                type="button"
-                onClick={handleRetry}
-              >
-                Tentar novamente
-              </button>
-              <Link className="secondary-action" to="/">
-                Voltar para suas páginas
-              </Link>
-            </div>
-          </div>
+          <LoadErrorState message={loadError} onRetry={retry} withBackLink />
         )}
 
         {!loading && !notFound && !loadError && (

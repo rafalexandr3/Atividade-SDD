@@ -1,9 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
-import App from '../App'
-import { AuthProvider } from './AuthContext'
+import { renderApp, resetClientMocks, sessionUser } from '../test/render-app'
 import { SESSION_KEY } from './session'
 
 const { mockGet, mockPost } = vi.hoisted(() => ({
@@ -25,22 +23,6 @@ const seedUser = {
   password: '123456',
 }
 
-const sessionUser = {
-  id: seedUser.id,
-  name: seedUser.name,
-  email: seedUser.email,
-}
-
-function renderApp(initialEntries = ['/']) {
-  return render(
-    <MemoryRouter initialEntries={initialEntries}>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </MemoryRouter>,
-  )
-}
-
 function readSession() {
   const raw = window.localStorage.getItem(SESSION_KEY)
   return raw ? JSON.parse(raw) : null
@@ -48,8 +30,7 @@ function readSession() {
 
 beforeEach(() => {
   window.localStorage.clear()
-  mockGet.mockReset()
-  mockPost.mockReset()
+  resetClientMocks({ mockGet, mockPost })
 })
 
 afterEach(() => {

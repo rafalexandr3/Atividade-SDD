@@ -8,7 +8,6 @@
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --accent-contrast: #fff;
-  --social-bg: rgba(244, 243, 236, 0.5);
   --danger: #c02626;
   --danger-bg: rgba(192, 38, 38, 0.08);
   --danger-border: rgba(192, 38, 38, 0.35);
@@ -17,7 +16,6 @@
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
 
   font: 16px/1.5 var(--sans);
   letter-spacing: 0.1px;
@@ -41,7 +39,6 @@
     --accent-bg: rgba(192, 132, 252, 0.15);
     --accent-border: rgba(192, 132, 252, 0.5);
     --accent-contrast: #16171d;
-    --social-bg: rgba(47, 48, 58, 0.5);
     --danger: #f87171;
     --danger-bg: rgba(248, 113, 113, 0.12);
     --danger-border: rgba(248, 113, 113, 0.4);

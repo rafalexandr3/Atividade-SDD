@@ -1,27 +1,7 @@
 import { useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const MIN_PASSWORD_LENGTH = 6
-
-function validate(email, password) {
-  const errors = {}
-
-  if (!email.trim()) {
-    errors.email = 'Informe seu e-mail'
-  } else if (!EMAIL_PATTERN.test(email.trim())) {
-    errors.email = 'Informe um e-mail válido'
-  }
-
-  if (!password) {
-    errors.password = 'Informe sua senha'
-  } else if (password.length < MIN_PASSWORD_LENGTH) {
-    errors.password = `A senha deve ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres`
-  }
-
-  return errors
-}
+import { validateLogin } from '../auth/validation'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -39,7 +19,7 @@ export default function LoginPage() {
     event.preventDefault()
     setFormError('')
 
-    const nextErrors = validate(email, password)
+    const nextErrors = validateLogin(email, password)
     setErrors(nextErrors)
 
     if (nextErrors.email) {

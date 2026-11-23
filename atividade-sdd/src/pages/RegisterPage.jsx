@@ -1,31 +1,7 @@
 import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const MIN_PASSWORD_LENGTH = 6
-
-function validate(name, email, password) {
-  const errors = {}
-
-  if (!name.trim()) {
-    errors.name = 'Informe seu nome'
-  }
-
-  if (!email.trim()) {
-    errors.email = 'Informe seu e-mail'
-  } else if (!EMAIL_PATTERN.test(email.trim())) {
-    errors.email = 'Informe um e-mail válido'
-  }
-
-  if (!password) {
-    errors.password = 'Informe uma senha'
-  } else if (password.length < MIN_PASSWORD_LENGTH) {
-    errors.password = `A senha deve ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres`
-  }
-
-  return errors
-}
+import { validateRegister } from '../auth/validation'
 
 export default function RegisterPage() {
   const { register } = useAuth()
@@ -44,7 +20,7 @@ export default function RegisterPage() {
     event.preventDefault()
     setFormError('')
 
-    const nextErrors = validate(name, email, password)
+    const nextErrors = validateRegister(name, email, password)
     setErrors(nextErrors)
 
     if (nextErrors.name) {

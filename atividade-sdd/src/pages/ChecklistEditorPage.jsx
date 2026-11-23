@@ -1,7 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { createChecklist, getById, updateChecklist } from '../api/pages'
+import { createChecklist, updateChecklist } from '../api/pages'
 import { useAuth } from '../auth/auth-context'
+import { AppHeader } from '../components/AppHeader'
+import {
+  LoadErrorState,
+  LoadingState,
+  NotFoundState,
+} from '../components/PageStates'
+import { isPageOfType, isPageOwnedBy } from './page-ownership'
+import { usePageLoader } from './usePageLoader'
 
 function nextItemId(items) {
   return (
@@ -33,83 +41,41 @@ export default function ChecklistEditorPage() {
   const [title, setTitle] = useState('')
   const [items, setItems] = useState([])
   const [newItemText, setNewItemText] = useState('')
-  const [loadedPage, setLoadedPage] = useState(null)
-  const [loading, setLoading] = useState(!isNew)
-  const [notFound, setNotFound] = useState(false)
-  const [loadError, setLoadError] = useState('')
   const [titleError, setTitleError] = useState('')
   const [itemError, setItemError] = useState('')
   const [formError, setFormError] = useState('')
   const [savedId, setSavedId] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [reloadKey, setReloadKey] = useState(0)
-  const [trackedId, setTrackedId] = useState(id)
+
+  const {
+    loadedPage,
+    loading,
+    notFound,
+    loadError,
+    retry,
+    markNotFound,
+    startLoading,
+  } = usePageLoader({
+    id,
+    type: 'checklist',
+    userId: user.id,
+    onIdChange: ({ previousId }) => {
+      setTitleError('')
+      setItemError('')
+      setFormError('')
+      setTitle('')
+      setItems([])
+      setNewItemText('')
+      setSaving(false)
+      if (previousId !== undefined) setSavedId(null)
+    },
+    onLoaded: (page) => {
+      setTitle(page.title ?? '')
+      setItems(normalizeItems(page.items))
+    },
+  })
 
   const saved = !isNew && String(savedId) === String(id)
-
-  if (trackedId !== id) {
-    setTrackedId(id)
-    setLoadedPage(null)
-    setLoading(!isNew)
-    setNotFound(false)
-    setLoadError('')
-    setTitleError('')
-    setItemError('')
-    setFormError('')
-    setTitle('')
-    setItems([])
-    setNewItemText('')
-    setSaving(false)
-    if (trackedId !== undefined) setSavedId(null)
-  }
-
-  useEffect(() => {
-    if (isNew) return
-
-    let active = true
-
-    getById(id)
-      .then((page) => {
-        if (!active) return
-
-        if (
-          page.type !== 'checklist' ||
-          String(page.userId) !== String(user.id)
-        ) {
-          setNotFound(true)
-          return
-        }
-
-        setLoadedPage(page)
-        setTitle(page.title ?? '')
-        setItems(normalizeItems(page.items))
-      })
-      .catch((error) => {
-        if (!active) return
-
-        if (error.status === 404) {
-          setNotFound(true)
-          return
-        }
-
-        setLoadError(error.message)
-      })
-      .finally(() => {
-        if (active) setLoading(false)
-      })
-
-    return () => {
-      active = false
-    }
-  }, [id, isNew, user.id, reloadKey])
-
-  function handleRetry() {
-    setLoading(true)
-    setLoadedPage(null)
-    setLoadError('')
-    setNotFound(false)
-    setReloadKey((current) => current + 1)
-  }
 
   function addItem() {
     const trimmedText = newItemText.trim()
@@ -174,18 +140,17 @@ export default function ChecklistEditorPage() {
           title: trimmedTitle,
           items,
         })
-        setLoading(true)
+        startLoading()
         setSavedId(String(created.id))
         navigate(`/checklists/${created.id}`, { replace: true })
       } else {
         if (
           !loadedPage ||
           String(loadedPage.id) !== String(id) ||
-          loadedPage.type !== 'checklist' ||
-          String(loadedPage.userId) !== String(user.id)
+          !isPageOfType(loadedPage, 'checklist') ||
+          !isPageOwnedBy(loadedPage, user.id)
         ) {
-          setNotFound(true)
-          setLoadError('')
+          markNotFound()
           return
         }
 
@@ -201,53 +166,15 @@ export default function ChecklistEditorPage() {
 
   return (
     <div className="pages-layout">
-      <header className="app-header">
-        <p className="brand">App de Anotações</p>
-        <div className="app-header-user">
-          <span className="user-name">{user.name}</span>
-          <Link className="ghost-button" to="/">
-            Suas páginas
-          </Link>
-        </div>
-      </header>
+      <AppHeader userName={user.name} />
 
       <main className="pages-main editor-main">
-        {loading && (
-          <p className="page-status" role="status">
-            Carregando página...
-          </p>
-        )}
+        {loading && <LoadingState message="Carregando página..." />}
 
-        {!loading && notFound && (
-          <section className="not-found" aria-labelledby="page-not-found-title">
-            <h1 id="page-not-found-title">Página não encontrada</h1>
-            <p>Esta página não existe ou não pertence à sua conta.</p>
-            <div className="not-found-actions">
-              <Link className="primary-action" to="/">
-                Voltar para suas páginas
-              </Link>
-            </div>
-          </section>
-        )}
+        {!loading && notFound && <NotFoundState />}
 
         {!loading && !notFound && loadError && (
-          <div className="page-load-error">
-            <p className="form-error" role="alert">
-              {loadError}
-            </p>
-            <div className="editor-actions">
-              <button
-                className="secondary-action"
-                type="button"
-                onClick={handleRetry}
-              >
-                Tentar novamente
-              </button>
-              <Link className="secondary-action" to="/">
-                Voltar para suas páginas
-              </Link>
-            </div>
-          </div>
+          <LoadErrorState message={loadError} onRetry={retry} withBackLink />
         )}
 
         {!loading && !notFound && !loadError && (

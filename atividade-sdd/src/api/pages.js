@@ -1,24 +1,8 @@
 import client from './client'
-
-export class PagesError extends Error {
-  constructor(message, status) {
-    super(message)
-    this.name = 'PagesError'
-    this.status = status
-  }
-}
+import { toApiError } from './errors'
 
 function toPagesError(error) {
-  if (error instanceof PagesError) return error
-  if (!error.response) {
-    return new PagesError('Não foi possível conectar ao servidor')
-  }
-  if (error.response.status === 404) {
-    return new PagesError('Página não encontrada', 404)
-  }
-  return new PagesError(
-    'Não foi possível concluir a operação. Tente novamente.',
-  )
+  return toApiError(error, { notFoundMessage: 'Página não encontrada' })
 }
 
 export async function listByUser(userId) {

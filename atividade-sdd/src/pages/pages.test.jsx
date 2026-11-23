@@ -9,9 +9,15 @@ import {
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom'
-import App from '../App'
 import { AuthProvider } from '../auth/AuthContext'
 import { SESSION_KEY } from '../auth/session'
+import {
+  renderApp,
+  resetClientMocks,
+  seedChecklist as checklist,
+  seedNote as note,
+  sessionUser,
+} from '../test/render-app'
 import PageEditorPage from './PageEditorPage'
 
 const { mockGet, mockPost, mockPatch, mockDelete } = vi.hoisted(() => ({
@@ -29,38 +35,6 @@ vi.mock('../api/client', () => ({
     delete: mockDelete,
   },
 }))
-
-const sessionUser = {
-  id: 1,
-  name: 'Usuário Exemplo',
-  email: 'usuario@exemplo.com',
-}
-
-const note = {
-  id: 1,
-  userId: 1,
-  title: 'Minha nota',
-  type: 'note',
-  content: 'Conteúdo inicial',
-}
-
-const checklist = {
-  id: 2,
-  userId: 1,
-  title: 'Minha checklist',
-  type: 'checklist',
-  items: [],
-}
-
-function renderApp(initialEntries = ['/']) {
-  return render(
-    <MemoryRouter initialEntries={initialEntries}>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </MemoryRouter>,
-  )
-}
 
 function EditorNavigationHarness() {
   const navigate = useNavigate()
@@ -80,10 +54,7 @@ function EditorNavigationHarness() {
 beforeEach(() => {
   window.localStorage.clear()
   window.localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser))
-  mockGet.mockReset()
-  mockPost.mockReset()
-  mockPatch.mockReset()
-  mockDelete.mockReset()
+  resetClientMocks({ mockGet, mockPost, mockPatch, mockDelete })
 })
 
 afterEach(() => {

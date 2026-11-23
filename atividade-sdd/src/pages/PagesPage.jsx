@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { listByUser, remove } from '../api/pages'
 import { useAuth } from '../auth/auth-context'
+import { AppHeader } from '../components/AppHeader'
+import { LoadErrorState, LoadingState } from '../components/PageStates'
+import { isPageOwnedBy } from './page-ownership'
 
 export default function PagesPage() {
   const { user, logout } = useAuth()
@@ -67,7 +70,7 @@ export default function PagesPage() {
   }
 
   async function handleDelete(page) {
-    if (String(page.userId) !== String(user.id)) {
+    if (!isPageOwnedBy(page, user.id)) {
       setActionError('Página não encontrada')
       return
     }
@@ -90,15 +93,7 @@ export default function PagesPage() {
 
   return (
     <div className="pages-layout">
-      <header className="app-header">
-        <p className="brand">App de Anotações</p>
-        <div className="app-header-user">
-          <span className="user-name">{user.name}</span>
-          <button className="ghost-button" type="button" onClick={handleLogout}>
-            Sair
-          </button>
-        </div>
-      </header>
+      <AppHeader userName={user.name} onLogout={handleLogout} />
 
       <main className="pages-main">
         <h1>Suas páginas</h1>
@@ -115,25 +110,10 @@ export default function PagesPage() {
           </div>
         </div>
 
-        {loading && (
-          <p className="page-status" role="status">
-            Carregando páginas...
-          </p>
-        )}
+        {loading && <LoadingState message="Carregando páginas..." />}
 
         {!loading && loadError && (
-          <div className="page-load-error">
-            <p className="form-error" role="alert">
-              {loadError}
-            </p>
-            <button
-              className="secondary-action"
-              type="button"
-              onClick={handleRetry}
-            >
-              Tentar novamente
-            </button>
-          </div>
+          <LoadErrorState message={loadError} onRetry={handleRetry} />
         )}
 
         {!loading && !loadError && pages.length === 0 && (

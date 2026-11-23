@@ -1,16 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   cleanup,
-  render,
   screen,
   waitFor,
   within,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
-import App from '../App'
-import { AuthProvider } from '../auth/AuthContext'
 import { SESSION_KEY } from '../auth/session'
+import {
+  renderApp,
+  resetClientMocks,
+  seedChecklist as checklist,
+  sessionUser,
+} from '../test/render-app'
 
 const { mockGet, mockPost, mockPatch, mockDelete } = vi.hoisted(() => ({
   mockGet: vi.fn(),
@@ -28,40 +30,10 @@ vi.mock('../api/client', () => ({
   },
 }))
 
-const sessionUser = {
-  id: 1,
-  name: 'Usuário Exemplo',
-  email: 'usuario@exemplo.com',
-}
-
-const checklist = {
-  id: 2,
-  userId: 1,
-  title: 'Minha checklist',
-  type: 'checklist',
-  items: [
-    { id: 1, text: 'Item de exemplo', done: false },
-    { id: 2, text: 'Segundo item', done: true },
-  ],
-}
-
-function renderApp(initialEntries = ['/']) {
-  return render(
-    <MemoryRouter initialEntries={initialEntries}>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </MemoryRouter>,
-  )
-}
-
 beforeEach(() => {
   window.localStorage.clear()
   window.localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser))
-  mockGet.mockReset()
-  mockPost.mockReset()
-  mockPatch.mockReset()
-  mockDelete.mockReset()
+  resetClientMocks({ mockGet, mockPost, mockPatch, mockDelete })
 })
 
 afterEach(() => {

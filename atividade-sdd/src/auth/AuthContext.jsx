@@ -1,21 +1,9 @@
 import { useMemo, useState } from 'react'
 import client from '../api/client'
+import { ApiError, toApiError } from '../api/errors'
 import { AuthContext } from './auth-context'
 import { clearSession, getSession, saveSession } from './session'
-
-class AuthError extends Error {}
-
-function normalizeEmail(email) {
-  return String(email ?? '').trim().toLowerCase()
-}
-
-function toAuthError(error) {
-  if (error instanceof AuthError) return error
-  if (!error.response) {
-    return new AuthError('Não foi possível conectar ao servidor')
-  }
-  return new AuthError('Não foi possível concluir a operação. Tente novamente.')
-}
+import { normalizeEmail } from './validation'
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => getSession())
@@ -43,12 +31,12 @@ export function AuthProvider({ children }) {
           : undefined
 
         if (!account) {
-          throw new AuthError('E-mail ou senha inválidos')
+          throw new ApiError('E-mail ou senha inválidos')
         }
 
         return persistUser(account)
       } catch (error) {
-        throw toAuthError(error)
+        throw toApiError(error)
       }
     }
 
@@ -67,7 +55,7 @@ export function AuthProvider({ children }) {
           )
 
         if (alreadyExists) {
-          throw new AuthError('E-mail já cadastrado')
+          throw new ApiError('E-mail já cadastrado')
         }
 
         const { data: created } = await client.post('/users', {
@@ -78,7 +66,7 @@ export function AuthProvider({ children }) {
 
         return persistUser(created)
       } catch (error) {
-        throw toAuthError(error)
+        throw toApiError(error)
       }
     }
 
